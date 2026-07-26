@@ -12,7 +12,7 @@ enabled = true
 #database_id = ""		#d1数据库id
 
 [[kv_namespaces]]
-binding = "DB"
+binding = "kv"
 id = "ab6205a486db04a487f8bb6bfde3dc37"
 
 #[[r2_buckets]]
