@@ -219,18 +219,22 @@ jobs:
         id: deploy
         working-directory: ./mail-worker
         run: |
-          echo "🚀 Starting deployment..."
-          pnpm wrangler deploy -c wrangler-action.toml --no-routes 2>&1 \
-            | tee deploy.log \
-            | grep -v "https://.*\.workers\.dev" \
-            | sed -E 's/env\.domain .*/env.domain (***)/' \
-            || true
-          
-          DEPLOY_EXIT_CODE=${PIPESTATUS[0]}
-          if [ $DEPLOY_EXIT_CODE -ne 0 ]; then
-            exit 1
-          fi
-          
+           name: 🚀 开始部署 / Start deployment
+   id: deploy
+   working-directory: ./mail-worker
+   run: |
+     echo "🚀 Starting deployment..."
+     pnpm wrangler deploy -c wrangler-action.toml --no-routes 2>&1 | tee deploy.log
+     DEPLOY_EXIT_CODE=${PIPESTATUS[0]}
+     if [ $DEPLOY_EXIT_CODE -ne 0 ]; then
+       exit 1
+     fi
+     WORKER_URL=$(grep -o "https://.*\.workers\.dev" deploy.log || echo "")
+     if [ -n "$WORKER_URL" ]; then
+       echo "::add-mask::$WORKER_URL"
+     fi
+     echo "worker_url=$WORKER_URL" >> $GITHUB_OUTPUT
+     echo "✅ Setup completed."
           WORKER_URL=$(grep -o "https://.*\.workers\.dev" deploy.log || echo "")
           
           if [ -n "$WORKER_URL" ]; then
